@@ -7,8 +7,11 @@ from routes.main import main
 import time
 
 app = Flask(__name__)
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
-ENV = 'prod'
+ENV = 'dev'
 
 if ENV == 'dev':
     app.debug = True
@@ -32,7 +35,4 @@ def index():
 
 
 if __name__ == '__main__':
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
     app.run()
