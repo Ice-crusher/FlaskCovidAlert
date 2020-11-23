@@ -8,7 +8,7 @@ import time
 
 app = Flask(__name__)
 
-ENV = 'dev'
+ENV = 'prod'
 
 if ENV == 'dev':
     app.debug = True
@@ -26,10 +26,10 @@ app.register_blueprint(main)
 #nearby_touch_schema = NearbyTouchSchema()
 # nearby_touches_schema = NearbyTouchSchema(many=True)
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 if __name__ == '__main__':
     db.init_app(app)

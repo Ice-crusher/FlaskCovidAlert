@@ -5,43 +5,41 @@ import time
 class NearbyTouch(db.Model):
     __tablename__ = 'NearbyTouch'
     id = db.Column(db.Integer, primary_key=True)
-    androidId = db.Column(db.String(100), unique=True)
+    userId = db.Column(db.String(100), index=True)
     time = db.Column(db.Integer, nullable=False)
     geographicCoordinateX = db.Column(db.Float, nullable=True)
     geographicCoordinateY = db.Column(db.Float, nullable=True)
-    nearbyIdentifier = db.Column(db.Integer, nullable=False)
-    opponentNearbyIdentifier = db.Column(db.Integer, nullable=False)
+    opponentId = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, androidId, nearbyIdentifier, opponentNearbyIdentifier,
+    def __init__(self, userId, opponentId,
                  geographicCoordinateX=None, geographicCoordinateY=None):
-        self.androidId = androidId
+        self.userId = userId
         self.time = time.time_ns()
         self.geographicCoordinateX = geographicCoordinateX
         self.geographicCoordinateY = geographicCoordinateY
-        self.nearbyIdentifier = nearbyIdentifier
-        self.opponentNearbyIdentifier = opponentNearbyIdentifier
+        self.opponentId = opponentId
 
 
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    androidId = db.Column(db.String(100), unique=True)
+    userId = db.Column(db.String(100), unique=True)
     fcmToken = db.Column(db.String(100), unique=True)
 
-    def __init__(self, androidId, fcmToken):
-        self.androidId = androidId
+    def __init__(self, userId, fcmToken):
+        self.userId = userId
         self.fcmToken = fcmToken
 
 
 class Sick(db.Model):
     __tablename__ = 'sick'
     id = db.Column(db.Integer, primary_key=True)
-    androidId = db.Column(db.String(100), unique=True)
+    userId = db.Column(db.String(100), unique=True)
     time = db.Column(db.Integer, nullable=False)
     nearbyIdentifier = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, androidId, nearbyIdentifier, timeNs):
-        self.androidId = androidId
+    def __init__(self, userId, nearbyIdentifier, timeNs):
+        self.userId = userId
         self.time = timeNs
         self.nearbyIdentifier = nearbyIdentifier
 

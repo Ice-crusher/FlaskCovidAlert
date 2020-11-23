@@ -11,16 +11,16 @@ TIME_7DAYS_NS = 7 * 24 * 60 * 60 * (10**9)
 
 @main.route('/nearbyTouch', methods=['POST'])
 def nearby_touch():
-    androidId = request.json['androidId']
+    userId = request.json['userId']
     geographicCoordinateX = request.json.get('geographicCoordinateX', None)
     geographicCoordinateY = request.json.get('geographicCoordinateY', None)
-    nearbyIdentifier = request.json['nearbyIdentifier']
-    opponentNearbyIdentifier = request.json['opponentNearbyIdentifier']
-    near_touch = NearbyTouch(androidId=androidId,
+    # nearbyIdentifier = request.json['nearbyIdentifier']#delete
+    opponentId = request.json['opponentId'] #change to id
+    near_touch = NearbyTouch(userId=userId,
                              geographicCoordinateX=geographicCoordinateX,
                              geographicCoordinateY=geographicCoordinateY,
-                             nearbyIdentifier=nearbyIdentifier,
-                             opponentNearbyIdentifier=opponentNearbyIdentifier)
+                             # nearbyIdentifier=nearbyIdentifier,
+                             opponentId=opponentId)
     db.session.add(near_touch)
     db.session.commit()
 
@@ -29,43 +29,51 @@ def nearby_touch():
 
 @main.route('/sick', methods=['POST'])
 def sick():
-    androidId = request.json['androidId']
+    userId = request.json['userId']
     timestamp = time.time_ns()
     # todo get all touched device by this user in last 7 days
     list = NearbyTouch.query.filter(
-        (NearbyTouch.androidId == androidId),
+        (NearbyTouch.userId == userId),
         (NearbyTouch.time > (timestamp - TIME_7DAYS_NS))
     ).all()
 
-    for item in list:
+    usersFCM = set()
+    for event in list:
+        userToSend = User.query.filter(
+            (User.userId == event.opponentId)
+        ).first()
+        if userToSend is not None:
+            usersFCM.add(userToSend.fcmToken)
 
-
-    return json.dumps({"message": str(len(list))}), 200
     # todo send FCM to previous touched devices
+
+    return json.dumps({"Founded events": str(len(list)),
+                       "Founded users": str(usersFCM)}), 200
 
 
 @main.route("/login", methods=['POST'])
 def login():
     # todo create or update user data
-    androidId = request.json['androidId']
+    userId = request.json['userId']
     fcmToken = request.json['fcmToken']
 
-    localUser = User.query.filter_by(androidId=androidId).first()
+    localUser = User.query.filter_by(userId=userId).first()
 
     if localUser is None:
-        user = User(androidId=androidId,
+        user = User(userId=userId,
                     fcmToken=fcmToken)
         db.session.add(user)
         db.session.commit()
 
         return json.dumps({"message": "User created."}), 200
     else:
-        localUser.androidId = androidId
+        
+        localUser.userId = userId
         localUser.fcmToken = fcmToken
         db.session.commit()
         return json.dumps({"message": "User updated."}), 200
 
-@main.route('/logout', methods=['DELETE'])
-def logout():
-    session.pop('user', None)
-    return json.dumps({"message": "Successful logout."}), 200
+# @main.route('/logout', methods=['DELETE'])
+# def logout():
+#     session.pop('user', None)
+#     return json.dumps({"message": "Successful logout."}), 200
