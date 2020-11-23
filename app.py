@@ -7,9 +7,6 @@ from routes.main import main
 import time
 
 app = Flask(__name__)
-db.init_app(app)
-with app.app_context():
-    db.create_all()
 
 ENV = 'prod'
 
@@ -25,6 +22,10 @@ app.secret_key = "super_secret_key"
 
 app.register_blueprint(main)
 
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+    
 # Init schemas
 #nearby_touch_schema = NearbyTouchSchema()
 # nearby_touches_schema = NearbyTouchSchema(many=True)
