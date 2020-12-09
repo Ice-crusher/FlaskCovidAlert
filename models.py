@@ -23,10 +23,12 @@ class NearbyTouch(db.Model):
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(30), index=True)
     userId = db.Column(db.String(100), unique=True)
     fcmToken = db.Column(db.String(100), unique=True)
 
-    def __init__(self, userId, fcmToken):
+    def __init__(self, email, userId, fcmToken):
+        self.email = email
         self.userId = userId
         self.fcmToken = fcmToken
 
@@ -34,13 +36,11 @@ class User(db.Model):
 class Sick(db.Model):
     __tablename__ = 'sick'
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(100), unique=True)
+    userId = db.Column(db.String(100), nullable=False)
     time = db.Column(db.Integer, nullable=False)
-    nearbyIdentifier = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, userId, nearbyIdentifier, timeNs):
+    def __init__(self, userId):
         self.userId = userId
-        self.time = timeNs
-        self.nearbyIdentifier = nearbyIdentifier
+        self.time = time.time_ns()
 
 

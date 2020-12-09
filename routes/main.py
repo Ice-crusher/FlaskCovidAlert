@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, json
-from models import NearbyTouch, User
+from models import NearbyTouch, User, Sick
 from extensions import db
-# from schemas import nearby_touch_schema
+import fcm_notifications
+import uuid
+from schemas import user_schema
 import time
 
 
@@ -14,8 +16,7 @@ def nearby_touch():
     userId = request.json['userId']
     geographicCoordinateX = request.json.get('geographicCoordinateX', None)
     geographicCoordinateY = request.json.get('geographicCoordinateY', None)
-    # nearbyIdentifier = request.json['nearbyIdentifier']#delete
-    opponentId = request.json['opponentId'] #change to id
+    opponentId = request.json['opponentId']
     near_touch = NearbyTouch(userId=userId,
                              geographicCoordinateX=geographicCoordinateX,
                              geographicCoordinateY=geographicCoordinateY,
@@ -31,6 +32,11 @@ def nearby_touch():
 def sick():
     userId = request.json['userId']
     timestamp = time.time_ns()
+
+    sick_inst = Sick(userId=userId)
+    db.session.add(sick_inst)
+    db.session.commit()
+
     # todo get all touched device by this user in last 7 days
     list = NearbyTouch.query.filter(
         (NearbyTouch.userId == userId),
@@ -38,14 +44,15 @@ def sick():
     ).all()
 
     usersFCM = set()
+
     for event in list:
         userToSend = User.query.filter(
             (User.userId == event.opponentId)
         ).first()
         if userToSend is not None:
             usersFCM.add(userToSend.fcmToken)
-
-    # todo send FCM to previous touched devices
+            # todo send FCM to previous touched devices
+            fcm_notifications.sendNotification(userToSend.fcmToken)
 
     return json.dumps({"Founded events": str(len(list)),
                        "Founded users": str(usersFCM)}), 200
@@ -54,24 +61,23 @@ def sick():
 @main.route("/login", methods=['POST'])
 def login():
     # todo create or update user data
-    userId = request.json['userId']
+    email = request.json['email']
     fcmToken = request.json['fcmToken']
 
-    localUser = User.query.filter_by(userId=userId).first()
+    localUser = User.query.filter_by(email=email).first()
 
     if localUser is None:
-        user = User(userId=userId,
+        user = User(email=email,
+                    userId=str(uuid.uuid4()),
                     fcmToken=fcmToken)
         db.session.add(user)
         db.session.commit()
 
-        return json.dumps({"message": "User created."}), 200
-    else:
-        
-        localUser.userId = userId
+        return user_schema.dump(user)
+    else:  # update fcm token
         localUser.fcmToken = fcmToken
         db.session.commit()
-        return json.dumps({"message": "User updated."}), 200
+        return user_schema.dump(localUser)
 
 # @main.route('/logout', methods=['DELETE'])
 # def logout():

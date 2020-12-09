@@ -8,9 +8,9 @@ import time
 
 app = Flask(__name__)
 
-ENV = 'prod'
+ENV = 'dev'
 
-if ENV == 'dev':
+if ENV == 'prod':
     app.debug = True
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./sql_app.db"
 else:
