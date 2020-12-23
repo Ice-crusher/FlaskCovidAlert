@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 ENV = 'prod'
 
-if ENV == 'prod':
+if ENV == 'dev':
     app.debug = True
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./sql_app.db"
 else:
@@ -25,10 +25,6 @@ app.register_blueprint(main)
 db.init_app(app)
 with app.app_context():
     db.create_all()
-    
-# Init schemas
-#nearby_touch_schema = NearbyTouchSchema()
-# nearby_touches_schema = NearbyTouchSchema(many=True)
 
 @app.route('/')
 def index():
