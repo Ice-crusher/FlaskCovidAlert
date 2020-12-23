@@ -9,7 +9,7 @@ class NearbyTouch(db.Model):
     time = db.Column(db.Integer, nullable=False)
     geographicCoordinateX = db.Column(db.Float, nullable=True)
     geographicCoordinateY = db.Column(db.Float, nullable=True)
-    opponentId = db.Column(db.Integer, nullable=False)
+    opponentId = db.Column(db.String(100), nullable=False)
 
     def __init__(self, userId, opponentId,
                  geographicCoordinateX=None, geographicCoordinateY=None):
