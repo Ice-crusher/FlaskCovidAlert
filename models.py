@@ -25,7 +25,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(30), index=True)
     userId = db.Column(db.String(100), unique=True)
-    fcmToken = db.Column(db.String(100), unique=True)
+    fcmToken = db.Column(db.String(200), unique=True)
 
     def __init__(self, email, userId, fcmToken):
         self.email = email
