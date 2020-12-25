@@ -52,7 +52,8 @@ def sick():
         if userToSend is not None:
             usersFCM.add(userToSend.fcmToken)
             # todo send FCM to previous touched devices
-            fcm_notifications.sendNotification(userToSend.fcmToken)
+        for fcm in usersFCM:
+            fcm_notifications.sendNotification(fcm)
 
     return json.dumps({"Founded events": str(len(list)),
                        "Founded users": str(usersFCM)}), 200
