@@ -56,7 +56,7 @@ def sick():
             fcm_notifications.sendNotification(fcm)
 
     return json.dumps({"Founded events": str(len(list)),
-                       "Founded users": str(usersFCM)}), 200
+                       "Founded fcms": str(usersFCM)}), 200
 
 
 @main.route("/login", methods=['POST'])
