@@ -6,7 +6,7 @@ class NearbyTouch(db.Model):
     __tablename__ = 'NearbyTouch'
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.String(100), index=True)
-    time = db.Column(db.Integer, nullable=False)
+    time = db.Column(db.BigInteger, nullable=False)
     geographicCoordinateX = db.Column(db.Float, nullable=True)
     geographicCoordinateY = db.Column(db.Float, nullable=True)
     opponentId = db.Column(db.String(100), nullable=False)
@@ -37,7 +37,7 @@ class Sick(db.Model):
     __tablename__ = 'sick'
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.String(100), nullable=False)
-    time = db.Column(db.Integer, nullable=False)
+    time = db.Column(db.BigInteger, nullable=False)
 
     def __init__(self, userId):
         self.userId = userId
