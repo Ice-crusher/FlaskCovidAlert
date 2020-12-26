@@ -1,4 +1,4 @@
-from extensions import ma
+from extensions import ma, mainWebSiteUrl
 from models import NearbyTouch
 from models import User
 
@@ -11,6 +11,7 @@ class NearbyTouchSchema(ma.SQLAlchemyAutoSchema):
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        fields = ("email", "userId", "fcmToken", "mainWebSiteUrl")
         model = User
 
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, json
 from models import NearbyTouch, User, Sick
-from extensions import db
+from extensions import db, mainWebSiteUrl
 import fcm_notifications
 import uuid
 from schemas import user_schema
@@ -73,12 +73,23 @@ def login():
                     fcmToken=fcmToken)
         db.session.add(user)
         db.session.commit()
-
-        return user_schema.dump(user)
+        return {
+            "userId": user.userId,
+            "email": user.email,
+            "fcmToken": user.fcmToken,
+            "mainWebSiteUrl": mainWebSiteUrl
+        }
+        # return user_schema.dump(user)
     else:  # update fcm token
         localUser.fcmToken = fcmToken
         db.session.commit()
-        return user_schema.dump(localUser)
+        return {
+            "userId": localUser.userId,
+            "email": localUser.email,
+            "fcmToken": localUser.fcmToken,
+            "mainWebSiteUrl": mainWebSiteUrl
+        }
+        # return user_schema.dump(localUser)
 
 # @main.route('/logout', methods=['DELETE'])
 # def logout():
