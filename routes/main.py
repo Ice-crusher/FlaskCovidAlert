@@ -37,7 +37,7 @@ def sick():
     db.session.add(sick_inst)
     db.session.commit()
 
-    # todo get all touched device by this user in last 7 days
+    # get all touched device by this user in last 7 days
     list = NearbyTouch.query.filter(
         (NearbyTouch.userId == userId),
         (NearbyTouch.time > (timestamp - TIME_7DAYS_NS))
@@ -52,7 +52,7 @@ def sick():
         if userToSend is not None:
             usersFCM.add(userToSend.fcmToken)
 
-    fcm_notifications.sendNotifications(usersFCM)
+    fcm_notifications.sendNotifications(list(usersFCM))
 
     return json.dumps({"Founded events": str(len(list)),
                        "Founded fcms": str(usersFCM)}), 200
