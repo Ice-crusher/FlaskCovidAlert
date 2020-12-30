@@ -38,29 +38,28 @@ def sick():
     db.session.commit()
 
     # get all touched device by this user in last 7 days
-    list = NearbyTouch.query.filter(
+    events = NearbyTouch.query.filter(
         (NearbyTouch.userId == userId),
         (NearbyTouch.time > (timestamp - TIME_7DAYS_NS))
     ).all()
 
     usersFCM = set()
 
-    for event in list:
+    for event in events:
         userToSend = User.query.filter(
             (User.userId == event.opponentId)
         ).first()
         if userToSend is not None:
             usersFCM.add(userToSend.fcmToken)
-
     fcm_notifications.sendNotifications(list(usersFCM))
 
-    return json.dumps({"Founded events": str(len(list)),
+    return json.dumps({"Founded events": str(len(events)),
                        "Founded fcms": str(usersFCM)}), 200
 
 
 @main.route("/login", methods=['POST'])
 def login():
-    # todo create or update user data
+    # create or update user data
     email = request.json['email']
     fcmToken = request.json['fcmToken']
 
