@@ -1,14 +1,10 @@
-from flask import Flask, render_template, request, session
+from extensions import app, db, ma, ENV
 from extensions import db
-from extensions import ma
-from datetime import timedelta
 import os
 from routes.main import main
-import time
+import flask_monitoringdashboard as dashboard
 
-app = Flask(__name__)
-
-ENV = 'prod'
+dashboard.bind(app)  # add analytics to "/dashboard"
 
 if ENV == 'dev':
     app.debug = True
@@ -25,10 +21,6 @@ app.register_blueprint(main)
 db.init_app(app)
 with app.app_context():
     db.create_all()
-
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 
 if __name__ == '__main__':

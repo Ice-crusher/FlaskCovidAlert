@@ -1,15 +1,15 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, json
 from models import NearbyTouch, User, Sick
-from extensions import db, mainWebSiteUrl
+from extensions import db, mainWebSiteUrl, cache
+import heatmap_render
 import fcm_notifications
 import uuid
-from schemas import user_schema
+import numpy as np
 import time
 
+TIME_7DAYS_NS = 7 * 24 * 60 * 60 * (10**9)
 
 main = Blueprint('main', __name__)
-
-TIME_7DAYS_NS = 7 * 24 * 60 * 60 * (10**9)
 
 @main.route('/nearbyTouch', methods=['POST'])
 def nearby_touch():
@@ -88,6 +88,72 @@ def login():
             "mainWebSiteUrl": mainWebSiteUrl
         }
         # return user_schema.dump(localUser)
+
+
+@main.route('/', defaults={'path': ''})
+@main.route('/<path:path>')
+def catch_all(path):
+    return redirect(url_for('main.statistics'))
+
+
+@main.route('/')
+def index():
+    return render_template('index.html')
+
+
+@main.route('/statistics', methods=['GET'])
+@cache.cached(timeout=60)  # cached for 60 seconds
+def statistics():
+    print("Cached time is:" + str(time.time_ns()))
+    touches_data, infected_touches_data = get_heatmap_data()
+    return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
+
+
+#  return lat, lon, magnitude
+def get_heatmap_data():
+    #  todo group with magnitude
+    touches_data = []
+
+    # all touches events
+    timestamp = time.time_ns()
+    touches_events = NearbyTouch.query.filter(
+        (NearbyTouch.time > (timestamp - TIME_7DAYS_NS))
+    ).all()
+
+    # sick incidents reported by users
+    sick_events = Sick.query.filter(
+        (Sick.time > (timestamp - TIME_7DAYS_NS))
+    ).all()
+
+    infected_touches_data = []
+    infected_user_ids = set()
+    for sick_event in sick_events:
+        infected_user_ids.add(sick_event.userId)
+
+    for touch_event in touches_events:
+        # x, y, magnitude
+        touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 1])
+        # complexity of search is O(n), because search complexity through set() equals O(1) (HashTable)
+        if touch_event.userId in infected_user_ids:
+            infected_touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 2])
+
+
+    # print(type(sick_events))
+
+    data = (
+            np.random.normal(size=(100, 3)) *
+            np.array([[1, 1, 1]]) +
+            np.array([[48, 5, 1]])
+    ).tolist()
+
+    data1 = (
+            np.random.normal(size=(100, 3)) *
+            np.array([[1, 1, 1]]) +
+            np.array([[48, 5, 1]])
+    ).tolist()
+    return data, data1
+
+
 
 # @main.route('/logout', methods=['DELETE'])
 # def logout():
