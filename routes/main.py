@@ -96,11 +96,6 @@ def catch_all(path):
     return redirect(url_for('main.statistics'))
 
 
-@main.route('/')
-def index():
-    return render_template('index.html')
-
-
 @main.route('/statistics', methods=['GET'])
 @cache.cached(timeout=60)  # cached for 60 seconds
 def statistics():
@@ -108,6 +103,26 @@ def statistics():
     touches_data, infected_touches_data = get_heatmap_data()
     return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
 
+@main.route('/dummy_statistics')
+def dummy_statistics():
+    touches_data, infected_touches_data = get_dummy_heatmap_data()
+    return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
+
+def get_dummy_heatmap_data():
+    # ['52.2297', '21.0122']
+    data = (
+            np.random.normal(size=(1000, 3)) *
+            np.array([[0.03, 0.07, 0]]) +
+            np.array([[52.2297, 21.0122, 1]])
+    ).tolist()
+
+    data1 = (
+            np.random.normal(size=(300, 3)) *
+            np.array([[0.03, 0.07, 0]]) +
+            np.array([[52.2297, 21.0122, 1]])
+    ).tolist()
+
+    return data, data1
 
 #  return lat, lon, magnitude
 def get_heatmap_data():
@@ -137,21 +152,7 @@ def get_heatmap_data():
         if touch_event.userId in infected_user_ids:
             infected_touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 2])
 
-
-    # print(type(sick_events))
-
-    data = (
-            np.random.normal(size=(100, 3)) *
-            np.array([[1, 1, 1]]) +
-            np.array([[48, 5, 1]])
-    ).tolist()
-
-    data1 = (
-            np.random.normal(size=(100, 3)) *
-            np.array([[1, 1, 1]]) +
-            np.array([[48, 5, 1]])
-    ).tolist()
-    return data, data1
+    return touches_data, infected_touches_data
 
 
 
