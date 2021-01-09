@@ -141,8 +141,8 @@ def get_heatmap_data():
     timestamp = time.time_ns()
     touches_events = NearbyTouch.query.filter(
         (NearbyTouch.time > (timestamp - TIME_7DAYS_NS)),
-        (NearbyTouch.geographicCoordinateX is not None),
-        (NearbyTouch.geographicCoordinateY is not None)
+        (NearbyTouch.geographicCoordinateX.isnot(None)),
+        (NearbyTouch.geographicCoordinateY.isnot(None))
     ).all()
 
     # sick incidents reported by users
