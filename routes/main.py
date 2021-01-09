@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, json
+from flask import Blueprint, render_template, request, redirect, url_for, json, send_from_directory
 from models import NearbyTouch, User, Sick
 from extensions import db, mainWebSiteUrl, cache
 import heatmap_render
@@ -11,6 +11,12 @@ TIME_7DAYS_NS = 7 * 24 * 60 * 60 * (10**9)
 
 main = Blueprint('main', __name__)
 
+
+@main.route('/favicon.ico')
+def favicon():
+    return redirect(url_for('static', filename='icon.ico'))
+
+
 @main.route('/nearbyTouch', methods=['POST'])
 def nearby_touch():
     userId = request.json['userId']
@@ -20,13 +26,13 @@ def nearby_touch():
     near_touch = NearbyTouch(userId=userId,
                              geographicCoordinateX=geographicCoordinateX,
                              geographicCoordinateY=geographicCoordinateY,
-                             # nearbyIdentifier=nearbyIdentifier,
                              opponentId=opponentId)
     db.session.add(near_touch)
     db.session.commit()
 
     return json.dumps({"message": "Stay safe!"}), 200
     # return nearby_touch_schema.jsonify(near_touch)
+
 
 @main.route('/sick', methods=['POST'])
 def sick():
@@ -99,34 +105,36 @@ def catch_all(path):
 @main.route('/statistics', methods=['GET'])
 @cache.cached(timeout=60)  # cached for 60 seconds
 def statistics():
-    print("Cached time is:" + str(time.time_ns()))
     touches_data, infected_touches_data = get_heatmap_data()
     return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
+
 
 @main.route('/dummy_statistics')
 def dummy_statistics():
     touches_data, infected_touches_data = get_dummy_heatmap_data()
     return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
 
+
 def get_dummy_heatmap_data():
-    # ['52.2297', '21.0122']
+    # random touches
     data = (
-            np.random.normal(size=(1000, 3)) *
+            np.random.normal(size=(3000, 3)) *
             np.array([[0.03, 0.07, 0]]) +
             np.array([[52.2297, 21.0122, 1]])
     ).tolist()
 
+    # random infected touches
     data1 = (
-            np.random.normal(size=(300, 3)) *
+            np.random.normal(size=(200, 3)) *
             np.array([[0.03, 0.07, 0]]) +
             np.array([[52.2297, 21.0122, 1]])
     ).tolist()
 
     return data, data1
 
+
 #  return lat, lon, magnitude
 def get_heatmap_data():
-    #  todo group with magnitude
     touches_data = []
 
     # all touches events
@@ -153,10 +161,3 @@ def get_heatmap_data():
             infected_touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 2])
 
     return touches_data, infected_touches_data
-
-
-
-# @main.route('/logout', methods=['DELETE'])
-# def logout():
-#     session.pop('user', None)
-#     return json.dumps({"message": "Successful logout."}), 200
