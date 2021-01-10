@@ -57,10 +57,10 @@ def sick():
         ).first()
         if userToSend is not None:
             usersFCM.add(userToSend.fcmToken)
-    fcm_notifications.sendNotifications(list(usersFCM))
+    for userFCM in usersFCM:
+        fcm_notifications.sendNotifications(userFCM)
 
-    return json.dumps({"Founded events": str(len(events)),
-                       "Founded fcms": str(usersFCM)}), 200
+    return json.dumps({"Found contacts": str(len(events))}), 200
 
 
 @main.route("/login", methods=['POST'])
@@ -129,7 +129,7 @@ def get_dummy_heatmap_data():
             np.array([[0.03, 0.07, 0]]) +
             np.array([[52.2297, 21.0122, 1]])
     ).tolist()
-
+    data += data1  # simulate overlapped infected touches
     return data, data1
 
 
@@ -158,8 +158,8 @@ def get_heatmap_data():
     for touch_event in touches_events:
         # x, y, magnitude
         touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 1])
-        # complexity of search is O(n), because search complexity through set() equals O(1) (HashTable)
-        if touch_event.userId in infected_user_ids:
+        # complexity of search is O(2n), because search complexity through set() equals O(1) (HashTable)
+        if (touch_event.userId in infected_user_ids) or (touch_event.opponentId in infected_user_ids):
             infected_touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 2])
 
     return touches_data, infected_touches_data
