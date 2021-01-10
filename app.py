@@ -1,7 +1,7 @@
 from extensions import app, db, ma, ENV
 import os
 from routes.main import main
-import flask_monitoringdashboard as dashboard
+# import flask_monitoringdashboard as dashboard
 
 
 if ENV == 'dev':
@@ -18,7 +18,7 @@ app.register_blueprint(main)
 db.init_app(app)
 with app.app_context():
     db.create_all()
-    dashboard.bind(app)  # add analytics to "/dashboard"
+    # dashboard.bind(app)  # add analytics to "/dashboard"
 
 if __name__ == '__main__':
     app.run()
