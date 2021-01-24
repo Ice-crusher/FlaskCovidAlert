@@ -112,7 +112,7 @@ def get_user_touch_history():
     touch_events = NearbyTouch.query.filter(
         (NearbyTouch.userId == userId),
         (NearbyTouch.opponentId.in_(sickIds))
-    ).all()
+    ).order_by(NearbyTouch.time.desc()).all()
 
     resp = dict()
     resp["history"] = []
