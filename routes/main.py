@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, json, send_from_directory
+from flask import Blueprint, request, redirect, url_for, json
 from models import NearbyTouch, User, Sick
+from schemas import nearby_touches_schema
 from extensions import db, mainWebSiteUrl, cache
 import heatmap_render
 import fcm_notifications
@@ -96,6 +97,37 @@ def login():
         # return user_schema.dump(localUser)
 
 
+# query parameters:
+# - "userId": String
+@main.route('/userTouchHistory', methods=['GET'])
+def get_user_touch_history():
+    if request.args.get('userId') is None:
+        return json.dumps({"message": "Bad query 'userId'"}), 400
+    userId = request.args.get('userId').replace('"', "")
+    # sick incidents reported by users
+    sick_events = Sick.query.all()
+    sickIds = [i.userId for i in sick_events]
+    print(sickIds)
+
+    touch_events = NearbyTouch.query.filter(
+        (NearbyTouch.userId == userId),
+        (NearbyTouch.opponentId.in_(sickIds))
+    ).all()
+
+    resp = dict()
+    resp["history"] = []
+    for event in touch_events:
+        resp["history"].append({
+            "time": event.time,
+            "geographicCoordinateX": event.geographicCoordinateX,
+            "geographicCoordinateY": event.geographicCoordinateY
+        })
+    # print(len(touch_events))
+    # return json.jsonify({'events': len(touch_events)})
+    print(resp)
+    return resp
+
+
 @main.route('/', defaults={'path': ''})
 @main.route('/<path:path>')
 def catch_all(path):
@@ -109,7 +141,7 @@ def statistics():
     return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
 
 
-@main.route('/dummy_statistics')
+@main.route('/dummy_statistics', methods=['GET'])
 def dummy_statistics():
     touches_data, infected_touches_data = get_dummy_heatmap_data()
     return heatmap_render.get_map_html(touches_data=touches_data, infected_touches_data=infected_touches_data)
@@ -139,7 +171,7 @@ def get_heatmap_data():
 
     # all touches events
     timestamp = time.time_ns()
-    touches_events = NearbyTouch.query.filter(
+    touch_events = NearbyTouch.query.filter(
         (NearbyTouch.time > (timestamp - TIME_7DAYS_NS)),
         (NearbyTouch.geographicCoordinateX.isnot(None)),
         (NearbyTouch.geographicCoordinateY.isnot(None))
@@ -155,7 +187,7 @@ def get_heatmap_data():
     for sick_event in sick_events:
         infected_user_ids.add(sick_event.userId)
 
-    for touch_event in touches_events:
+    for touch_event in touch_events:
         # x, y, magnitude
         touches_data.append([touch_event.geographicCoordinateX, touch_event.geographicCoordinateY, 1])
         # complexity of search is O(2n), because search complexity through set() equals O(1) (HashTable)

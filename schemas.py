@@ -5,8 +5,9 @@ from models import User
 
 class NearbyTouchSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        # fields = ('userId', 'time', 'geographicCoordinateX', 'geographicCoordinateY', 'nearbyIdentifier', 'opponentId')
         model = NearbyTouch
-        #fields = ('id', 'userId', 'time', 'geographicCoordinateX', 'geographicCoordinateY', 'nearbyIdentifier', 'opponentId')
+        created_at = ma.auto_field(dump_only=True)
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
@@ -16,4 +17,5 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
 
 nearby_touch_schema = NearbyTouchSchema()
+nearby_touches_schema = NearbyTouchSchema(many=True)
 user_schema = UserSchema()
