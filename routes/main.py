@@ -118,7 +118,7 @@ def get_user_touch_history():
     resp["history"] = []
     for event in touch_events:
         resp["history"].append({
-            "time": event.time // 1000*1000,  # ns -> unix epoch
+            "time": event.time // 1000000,  # ns -> unix epoch
             "geographicCoordinateX": event.geographicCoordinateX,
             "geographicCoordinateY": event.geographicCoordinateY
         })
