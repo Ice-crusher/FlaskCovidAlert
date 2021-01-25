@@ -68,13 +68,17 @@ def sick():
 def login():
     # create or update user data
     email = request.json['email']
+    instanceId = request.json['instanceId']
     fcmToken = request.json['fcmToken']
 
-    localUser = User.query.filter_by(email=email).first()
+    localUser = User.query.filter(
+        (User.instanceId == instanceId)
+    ).first()
 
     if localUser is None:
         user = User(email=email,
                     userId=str(uuid.uuid4()),
+                    instanceId=instanceId,
                     fcmToken=fcmToken)
         db.session.add(user)
         db.session.commit()
@@ -86,6 +90,7 @@ def login():
         }
         # return user_schema.dump(user)
     else:  # update fcm token
+        localUser.email = email
         localUser.fcmToken = fcmToken
         db.session.commit()
         return {
@@ -172,7 +177,7 @@ def get_heatmap_data():
     # all touches events
     timestamp = time.time_ns()
     touch_events = NearbyTouch.query.filter(
-        (NearbyTouch.time > (timestamp - TIME_7DAYS_NS)),
+        # (NearbyTouch.time > (timestamp - TIME_7DAYS_NS)),  # todo make html picker
         (NearbyTouch.geographicCoordinateX.isnot(None)),
         (NearbyTouch.geographicCoordinateY.isnot(None))
     ).all()
