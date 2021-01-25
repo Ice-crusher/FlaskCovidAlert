@@ -3,7 +3,7 @@ import time
 
 
 class NearbyTouch(db.Model):
-    __tablename__ = 'NearbyTouch'
+    __tablename__ = 'NearbyTouches'
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.String(100), index=True)
     time = db.Column(db.BigInteger, nullable=False)
@@ -21,7 +21,7 @@ class NearbyTouch(db.Model):
 
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'Users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(30), index=True)
     instanceId = db.Column(db.String(100), unique=True)
@@ -36,7 +36,7 @@ class User(db.Model):
 
 
 class Sick(db.Model):
-    __tablename__ = 'sick'
+    __tablename__ = 'Sick'
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.String(100), nullable=False)
     time = db.Column(db.BigInteger, nullable=False)
