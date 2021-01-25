@@ -10,20 +10,19 @@ def get_map_html(touches_data, infected_touches_data):
                          zoom_start=zoom,
                          tiles=title)
 
-    gradient_hmap = {.25: '#92E01C', .50: '#FEF921', .90: '#F3733F', 1: '#EE3D3D'}
-    # gradient_hmap1 = {.25: '#FDB7C8', .50: '#FE6B8F', .90: '#D34468', 1: '#8E2D46'}
+    gradientAllContacts = {.25: '#A6F2E5', .50: '#6ED4BF', .90: '#4DAA98', 1: '#337A6C'}
     hmap = folium.plugins.HeatMap(touches_data,
-                                  gradient=gradient_hmap,
+                                  gradient=gradientAllContacts,
                                   max_val=1,
                                   min_opacity=0.3,
                                   radius=17,
                                   blur=15,
                                   max_zoom=1)
 
-    gradient = {.25: '#A6F2E5', .50: '#6ED4BF', .75: '#4DAA98', 1: '#337A6C'}
+    gradientInfectedContacts = {.25: '#92E01C', .50: '#FEF921', .90: '#F3733F', 1: '#EE3D3D'}
     infected_hmap = folium.plugins.HeatMap(infected_touches_data,
                                            max_val=1,
-                                           gradient=gradient,
+                                           gradient=gradientInfectedContacts,
                                            min_opacity=0.3,
                                            radius=17,
                                            blur=15,
