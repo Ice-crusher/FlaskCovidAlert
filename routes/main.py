@@ -1,6 +1,5 @@
 from flask import Blueprint, request, redirect, url_for, json
 from models import NearbyTouch, User, Sick
-from schemas import nearby_touches_schema
 from extensions import db, mainWebSiteUrl, cache
 import heatmap_render
 import fcm_notifications
@@ -64,7 +63,7 @@ def sick():
     return json.dumps({"Found contacts": str(len(events))}), 200
 
 
-@main.route("/login", methods=['POST'])
+@main.route('/login', methods=['POST'])
 def login():
     # create or update user data
     email = request.json['email']
@@ -184,7 +183,7 @@ def get_heatmap_data():
 
     # sick incidents reported by users
     sick_events = Sick.query.filter(
-        (Sick.time > (timestamp - TIME_7DAYS_NS))
+        # (Sick.time > (timestamp - TIME_7DAYS_NS))
     ).all()
 
     infected_touches_data = []
