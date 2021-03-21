@@ -22,10 +22,9 @@ class NearbyTouch(db.Model):
 
 class User(db.Model):
     __tablename__ = 'Users'
-    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.String(100), primary_key=True)
     email = db.Column(db.String(30), index=True)
     instanceId = db.Column(db.String(100), unique=True)
-    userId = db.Column(db.String(100), unique=True)
     fcmToken = db.Column(db.String(200), index=True)
 
     def __init__(self, email, instanceId, userId, fcmToken):
